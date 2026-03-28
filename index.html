@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteForge — AI Website Builder</title>
+<link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--sf-bg:#0d1117;--sf-surface:#161b22;--sf-surface2:#21262d;--sf-border:#30363d;--sf-text:#e6edf3;--sf-text2:#8b949e;--sf-accent:#58a6ff;--sf-accent2:#1f6feb;--sf-danger:#f85149;--sf-success:#3fb950;--sf-warning:#d29922;--sf-purple:#bc8cff;--sf-pink:#f778ba;
+--gjs-primary-color:var(--sf-surface);--gjs-secondary-color:var(--sf-text2);--gjs-tertiary-color:var(--sf-accent);--gjs-quaternary-color:var(--sf-accent);}
+body{font-family:'Inter',sans-serif;background:var(--sf-bg);color:var(--sf-text);overflow:hidden;height:100vh;}
+
+/* TOP BAR */
+.sf-topbar{height:48px;background:var(--sf-surface);border-bottom:1px solid var(--sf-border);display:flex;align-items:center;padding:0 12px;z-index:100;position:relative;}
+.sf-logo{font-size:16px;font-weight:700;color:var(--sf-accent);margin-right:20px;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.sf-logo i{font-size:18px;}
+.sf-topbar-group{display:flex;align-items:center;gap:2px;}
+.sf-topbar-group+.sf-topbar-group{margin-left:8px;padding-left:8px;border-left:1px solid var(--sf-border);}
+.sf-topbar-right{margin-left:auto;display:flex;align-items:center;gap:2px;}
+.sf-btn{background:transparent;border:none;color:var(--sf-text2);cursor:pointer;padding:6px 10px;border-radius:6px;font-size:13px;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
+.sf-btn:hover{background:var(--sf-surface2);color:var(--sf-text);}
+.sf-btn.active{background:var(--sf-accent2);color:#fff;}
+.sf-btn-accent{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff!important;font-weight:500;}
+.sf-btn-accent:hover{opacity:.9;background:linear-gradient(135deg,#7c3aed,#2563eb);}
+.sf-btn-ai{background:linear-gradient(135deg,#f59e0b,#ef4444,#8b5cf6);color:#fff!important;font-weight:600;padding:6px 14px;}
+.sf-btn-ai:hover{opacity:.9;transform:scale(1.02);}
+.sf-sep{width:1px;height:24px;background:var(--sf-border);margin:0 6px;}
+
+/* MAIN LAYOUT */
+.sf-main{display:flex;height:calc(100vh - 48px);}
+
+/* LEFT PANEL */
+.sf-left{width:240px;background:var(--sf-surface);border-right:1px solid var(--sf-border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .2s;}
+.sf-left.collapsed{width:0;border:none;}
+.sf-left-tabs{display:flex;border-bottom:1px solid var(--sf-border);flex-shrink:0;}
+.sf-left-tab{flex:1;padding:10px 6px;text-align:center;font-size:11px;color:var(--sf-text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.sf-left-tab:hover{color:var(--sf-text);background:var(--sf-surface2);}
+.sf-left-tab.active{color:var(--sf-accent);border-bottom-color:var(--sf-accent);}
+.sf-left-tab i{display:block;font-size:16px;margin-bottom:3px;}
+.sf-left-content{flex:1;overflow-y:auto;padding:8px;}
+.sf-left-content::-webkit-scrollbar{width:4px;}
+.sf-left-content::-webkit-scrollbar-thumb{background:var(--sf-border);border-radius:4px;}
+#blocks-container .gjs-block{width:calc(50% - 5px);min-height:auto;padding:10px 5px;margin:2px;background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:6px;color:var(--sf-text2);font-size:11px;transition:all .15s;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;}
+#blocks-container .gjs-block:hover{border-color:var(--sf-accent);color:var(--sf-text);transform:translateY(-1px);}
+#blocks-container .gjs-block svg{fill:var(--sf-text2);}
+
+/* CENTER CANVAS */
+.sf-center{flex:1;display:flex;flex-direction:column;min-width:0;}
+.sf-canvas-wrap{flex:1;position:relative;}
+
+/* RIGHT PANEL */
+.sf-right{width:260px;background:var(--sf-surface);border-left:1px solid var(--sf-border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:width .2s;}
+.sf-right.collapsed{width:0;border:none;}
+.sf-right-tabs{display:flex;border-bottom:1px solid var(--sf-border);flex-shrink:0;}
+.sf-right-tab{flex:1;padding:10px 4px;text-align:center;font-size:10px;color:var(--sf-text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.sf-right-tab:hover{color:var(--sf-text);background:var(--sf-surface2);}
+.sf-right-tab.active{color:var(--sf-accent);border-bottom-color:var(--sf-accent);}
+.sf-right-tab i{display:block;font-size:14px;margin-bottom:2px;}
+.sf-right-content{flex:1;overflow-y:auto;}
+.sf-right-content::-webkit-scrollbar{width:4px;}
+.sf-right-content::-webkit-scrollbar-thumb{background:var(--sf-border);border-radius:4px;}
+.sf-right-pane{display:none;padding:0;}
+.sf-right-pane.active{display:block;}
+
+/* GJS OVERRIDES */
+.gjs-one-bg{background-color:var(--sf-surface)!important;}
+.gjs-two-color{color:var(--sf-text2)!important;}
+.gjs-three-bg{background-color:var(--sf-accent2)!important;color:#fff!important;}
+.gjs-four-color,.gjs-four-color-h:hover{color:var(--sf-accent)!important;}
+.gjs-cv-canvas{background:var(--sf-bg);top:0;width:100%;height:100%;}
+.gjs-frame-wrapper{padding-top:0!important;}
+.gjs-pn-panel{background:transparent;}
+.gjs-sm-sector .gjs-sm-sector-title{background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:4px;padding:8px 10px;margin:4px 8px;color:var(--sf-text);font-size:12px;}
+.gjs-sm-sector .gjs-sm-properties{padding:8px;}
+.gjs-clm-tags{padding:8px;}
+.gjs-clm-tags .gjs-sm-title{display:none;}
+.gjs-field{background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:4px;color:var(--sf-text);}
+.gjs-field input,.gjs-field select,.gjs-field textarea{color:var(--sf-text);}
+.gjs-radio-item{background:var(--sf-surface2);border-color:var(--sf-border);}
+.gjs-radio-item:checked,.gjs-radio-item.active{background:var(--sf-accent2);}
+.gjs-layer-name{font-size:12px;}
+.gjs-layers{background:transparent;}
+.gjs-layer{background:var(--sf-surface2);border-radius:4px;margin:2px 4px;}
+.gjs-trt-traits{padding:8px;}
+.gjs-trt-trait{margin-bottom:8px;}
+.gjs-block-category .gjs-title{background:var(--sf-surface2)!important;border:1px solid var(--sf-border)!important;border-radius:4px;margin:4px 0;padding:8px 10px;color:var(--sf-text);font-size:12px;font-weight:500;}
+.gjs-sm-sector-title::before,.gjs-title::before{content:'';}
+.gjs-blocks-cs{padding:0;}
+
+/* MODAL */
+.sf-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.sf-overlay.show{display:flex;animation:fadeIn .2s;}
+.sf-modal{background:var(--sf-surface);border:1px solid var(--sf-border);border-radius:12px;width:90%;max-width:640px;max-height:85vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.sf-modal-lg{max-width:900px;}
+.sf-modal-header{padding:16px 20px;border-bottom:1px solid var(--sf-border);display:flex;align-items:center;justify-content:space-between;}
+.sf-modal-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.sf-modal-close{background:none;border:none;color:var(--sf-text2);cursor:pointer;font-size:18px;padding:4px;border-radius:4px;}
+.sf-modal-close:hover{color:var(--sf-text);background:var(--sf-surface2);}
+.sf-modal-body{padding:20px;overflow-y:auto;max-height:calc(85vh - 120px);}
+.sf-modal-body::-webkit-scrollbar{width:4px;}
+.sf-modal-body::-webkit-scrollbar-thumb{background:var(--sf-border);border-radius:4px;}
+
+/* AI Modal */
+.sf-ai-textarea{width:100%;min-height:120px;background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:8px;padding:14px;color:var(--sf-text);font-size:14px;font-family:inherit;resize:vertical;}
+.sf-ai-textarea:focus{outline:none;border-color:var(--sf-accent);}
+.sf-ai-textarea::placeholder{color:var(--sf-text2);}
+.sf-ai-examples{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;}
+.sf-ai-example{background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--sf-text2);cursor:pointer;transition:all .15s;}
+.sf-ai-example:hover{border-color:var(--sf-accent);color:var(--sf-text);}
+.sf-ai-generate-btn{width:100%;margin-top:16px;padding:12px;background:linear-gradient(135deg,#f59e0b,#ef4444,#8b5cf6);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.sf-ai-generate-btn:hover{opacity:.9;transform:translateY(-1px);}
+.sf-ai-generate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.sf-ai-loading{display:none;text-align:center;padding:40px 20px;}
+.sf-ai-loading.show{display:block;}
+.sf-ai-spinner{width:48px;height:48px;border:3px solid var(--sf-border);border-top-color:var(--sf-accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
+.sf-ai-loading-text{color:var(--sf-text2);font-size:14px;}
+.sf-ai-form{}
+.sf-ai-form.hidden{display:none;}
+
+/* Templates Grid */
+.sf-templates-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.sf-template-card{background:var(--sf-surface2);border:1px solid var(--sf-border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.sf-template-card:hover{border-color:var(--sf-accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.sf-template-preview{height:140px;background:var(--sf-bg);display:flex;align-items:center;justify-content:center;font-size:36px;}
+.sf-template-info{padding:10px 12px;}
+.sf-template-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.sf-template-desc{font-size:11px;color:var(--sf-text2);}
+
+/* Pages panel */
+.sf-pages-list{list-style:none;}
+.sf-page-item{display:flex;align-items:center;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:2px;font-size:13px;color:var(--sf-text2);transition:all .15s;}
+.sf-page-item:hover{background:var(--sf-surface2);color:var(--sf-text);}
+.sf-page-item.active{background:var(--sf-accent2);color:#fff;}
+.sf-page-item i{margin-right:8px;font-size:12px;}
+.sf-add-page{display:flex;align-items:center;gap:6px;padding:8px 10px;color:var(--sf-accent);font-size:12px;cursor:pointer;border-radius:6px;}
+.sf-add-page:hover{background:var(--sf-surface2);}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.gjs-frame{min-height:100%;}
+
+/* Hide default panels */
+.gjs-pn-panels{display:none!important;}
+.gjs-pn-views-container{display:none!important;}
+.gjs-pn-views{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="sf-topbar">
+  <div class="sf-logo"><i class="fa-solid fa-cube"></i> SiteForge</div>
+  <div class="sf-topbar-group">
+    <button class="sf-btn" id="btn-undo" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+    <button class="sf-btn" id="btn-redo" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+  </div>
+  <div class="sf-topbar-group">
+    <button class="sf-btn active" id="btn-desktop" title="Desktop"><i class="fa-solid fa-desktop"></i></button>
+    <button class="sf-btn" id="btn-tablet" title="Tablet"><i class="fa-solid fa-tablet-screen-button"></i></button>
+    <button class="sf-btn" id="btn-mobile" title="Mobile"><i class="fa-solid fa-mobile-screen-button"></i></button>
+  </div>
+  <div class="sf-topbar-group">
+    <button class="sf-btn" id="btn-borders" title="Toggle Borders"><i class="fa-solid fa-border-all"></i></button>
+    <button class="sf-btn" id="btn-preview" title="Preview"><i class="fa-solid fa-eye"></i></button>
+    <button class="sf-btn" id="btn-fullscreen" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+    <button class="sf-btn" id="btn-code" title="View Code"><i class="fa-solid fa-code"></i></button>
+  </div>
+  <div class="sf-topbar-group">
+    <button class="sf-btn" id="btn-templates" title="Templates"><i class="fa-solid fa-palette"></i> Templates</button>
+    <button class="sf-btn" id="btn-import" title="Import HTML"><i class="fa-solid fa-file-import"></i> Import</button>
+  </div>
+  <div class="sf-topbar-right">
+    <button class="sf-btn sf-btn-ai" id="btn-ai"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generate</button>
+    <div class="sf-sep"></div>
+    <button class="sf-btn" id="btn-clear" title="Clear Canvas"><i class="fa-solid fa-trash-can"></i></button>
+    <button class="sf-btn sf-btn-accent" id="btn-export" title="Export"><i class="fa-solid fa-download"></i> Export</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="sf-main">
+  <!-- LEFT -->
+  <div class="sf-left" id="sf-left">
+    <div class="sf-left-tabs">
+      <div class="sf-left-tab active" data-tab="blocks"><i class="fa-solid fa-cube"></i>Blocks</div>
+      <div class="sf-left-tab" data-tab="pages"><i class="fa-solid fa-file"></i>Pages</div>
+    </div>
+    <div class="sf-left-content">
+      <div id="blocks-container" class="sf-left-pane active"></div>
+      <div id="pages-container" class="sf-left-pane" style="display:none">
+        <ul class="sf-pages-list" id="pages-list">
+          <li class="sf-page-item active"><i class="fa-solid fa-file"></i> Home</li>
+        </ul>
+        <div class="sf-add-page" id="add-page"><i class="fa-solid fa-plus"></i> Add Page</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="sf-center">
+    <div class="sf-canvas-wrap">
+      <div id="gjs"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="sf-right" id="sf-right">
+    <div class="sf-right-tabs">
+      <div class="sf-right-tab active" data-tab="styles"><i class="fa-solid fa-paint-brush"></i>Styles</div>
+      <div class="sf-right-tab" data-tab="traits"><i class="fa-solid fa-gear"></i>Settings</div>
+      <div class="sf-right-tab" data-tab="layers"><i class="fa-solid fa-layer-group"></i>Layers</div>
+    </div>
+    <div class="sf-right-content">
+      <div id="styles-container" class="sf-right-pane active"></div>
+      <div id="traits-container" class="sf-right-pane"></div>
+      <div id="layers-container" class="sf-right-pane"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AI MODAL -->
+<div class="sf-overlay" id="ai-modal">
+  <div class="sf-modal">
+    <div class="sf-modal-header">
+      <div class="sf-modal-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--sf-warning)"></i> AI Website Generator</div>
+      <button class="sf-modal-close" onclick="closeModal('ai-modal')">&times;</button>
+    </div>
+    <div class="sf-modal-body">
+      <div class="sf-ai-form" id="ai-form">
+        <textarea class="sf-ai-textarea" id="ai-prompt" placeholder="Describe the website you want to build...&#10;&#10;Example: A modern SaaS landing page for a project management tool called TaskFlow. Use blue and purple gradient colors. Include hero with headline, features section with icons, pricing table with 3 plans, testimonials, and a footer."></textarea>
+        <div class="sf-ai-examples">
+          <span class="sf-ai-example" onclick="setAiPrompt('A restaurant website for an Italian bistro called La Dolce Vita with warm colors, menu section, about us, and reservation form')">🍕 Restaurant</span>
+          <span class="sf-ai-example" onclick="setAiPrompt('A modern portfolio for a UI/UX designer named Alex Chen. Minimalist dark theme, project gallery, about section, skills, and contact form')">🎨 Portfolio</span>
+          <span class="sf-ai-example" onclick="setAiPrompt('A SaaS landing page for a cloud storage service called CloudVault. Blue gradient theme, hero with CTA, features with icons, pricing plans, FAQ section')">☁️ SaaS</span>
+          <span class="sf-ai-example" onclick="setAiPrompt('An online store landing page for handmade jewelry. Elegant gold and white theme, product showcase, featured collections, testimonials, newsletter signup')">💎 E-commerce</span>
+          <span class="sf-ai-example" onclick="setAiPrompt('A fitness gym website called IronForge. Dark bold theme with red accents, hero with CTA, class schedule, trainers section, membership plans, contact')">💪 Fitness</span>
+          <span class="sf-ai-example" onclick="setAiPrompt('A tech startup landing page for an AI analytics platform called DataMind. Futuristic dark theme with neon accents, hero, features, how it works, pricing')">🤖 Tech Startup</span>
+        </div>
+        <button class="sf-ai-generate-btn" id="ai-generate-btn" onclick="generateAiWebsite()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Website</button>
+      </div>
+      <div class="sf-ai-loading" id="ai-loading">
+        <div class="sf-ai-spinner"></div>
+        <div class="sf-ai-loading-text" id="ai-loading-text">Analyzing your description...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATES MODAL -->
+<div class="sf-overlay" id="templates-modal">
+  <div class="sf-modal sf-modal-lg">
+    <div class="sf-modal-header">
+      <div class="sf-modal-title"><i class="fa-solid fa-palette" style="color:var(--sf-purple)"></i> Templates</div>
+      <button class="sf-modal-close" onclick="closeModal('templates-modal')">&times;</button>
+    </div>
+    <div class="sf-modal-body">
+      <div class="sf-templates-grid" id="templates-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="sf-overlay" id="import-modal">
+  <div class="sf-modal">
+    <div class="sf-modal-header">
+      <div class="sf-modal-title"><i class="fa-solid fa-file-import" style="color:var(--sf-success)"></i> Import HTML</div>
+      <button class="sf-modal-close" onclick="closeModal('import-modal')">&times;</button>
+    </div>
+    <div class="sf-modal-body">
+      <textarea class="sf-ai-textarea" id="import-code" placeholder="Paste your HTML code here..." style="min-height:200px;font-family:monospace;font-size:13px;"></textarea>
+      <button class="sf-ai-generate-btn" style="background:var(--sf-accent2)" onclick="importHtml()"><i class="fa-solid fa-file-import"></i> Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://unpkg.com/grapesjs"></script>
+<script src="https://unpkg.com/grapesjs-blocks-basic"></script>
+<script src="https://unpkg.com/grapesjs-preset-webpage"></script>
+<script src="https://unpkg.com/grapesjs-plugin-forms"></script>
+<script src="https://unpkg.com/grapesjs-component-countdown"></script>
+<script src="https://unpkg.com/grapesjs-tabs"></script>
+<script src="https://unpkg.com/grapesjs-custom-code"></script>
+<script src="https://unpkg.com/grapesjs-parser-postcss"></script>
+<script src="https://unpkg.com/grapesjs-tooltip"></script>
+<script src="https://unpkg.com/grapesjs-style-bg"></script>
+<script>
+// ===================== INIT GRAPESJS =====================
+const editor = grapesjs.init({
+  container: '#gjs',
+  height: '100%',
+  width: 'auto',
+  fromElement: false,
+  storageManager: { type: 'local', autosave: true, autoload: true, stepsBeforeSave: 1, options: { local: { key: 'siteforge-project' } } },
+  undoManager: { maximumStackLength: 50 },
+  canvas: { styles: [
+    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
+  ]},
+  blockManager: { appendTo: '#blocks-container' },
+  layerManager: { appendTo: '#layers-container' },
+  traitManager: { appendTo: '#traits-container' },
+  selectorManager: { appendTo: '#styles-container' },
+  styleManager: {
+    appendTo: '#styles-container',
+    sectors: [
+      { name: 'General', open: false, buildProps: ['display','position','top','right','left','bottom','float','clear','overflow','overflow-x','overflow-y'] },
+      { name: 'Dimension', open: false, buildProps: ['width','min-width','max-width','height','min-height','max-height','margin','padding'] },
+      { name: 'Typography', open: false, buildProps: ['font-family','font-size','font-weight','letter-spacing','color','line-height','text-align','text-decoration','text-transform','font-style'],
+        properties: [{ property:'font-family', name:'Font', type:'select',
+          options: [{value:'Inter,sans-serif',name:'Inter'},{value:'Poppins,sans-serif',name:'Poppins'},{value:'"Playfair Display",serif',name:'Playfair Display'},{value:'Arial,Helvetica,sans-serif',name:'Arial'},{value:'Georgia,serif',name:'Georgia'},{value:'"Times New Roman",serif',name:'Times New Roman'},{value:'"Courier New",monospace',name:'Courier New'},{value:'Verdana,sans-serif',name:'Verdana'},{value:'system-ui,sans-serif',name:'System UI'}]
+        }]
+      },
+      { name: 'Decorations', open: false, buildProps: ['background-color','border','border-radius','box-shadow','background'] },
+      { name: 'Extra', open: false, buildProps: ['opacity','transition','transform','cursor','z-index'] },
+      { name: 'Flex', open: false, buildProps: ['flex-direction','flex-wrap','justify-content','align-items','align-content','gap','order','flex-basis','flex-grow','flex-shrink','align-self'] },
+    ]
+  },
+  deviceManager: {
+    devices: [
+      { name: 'Desktop', width: '' },
+      { name: 'Tablet', width: '768px', widthMedia: '992px' },
+      { name: 'Mobile', width: '375px', widthMedia: '480px' }
+    ]
+  },
+  plugins: ['gjs-blocks-basic','gjs-preset-webpage','gjs-plugin-forms','gjs-component-countdown','gjs-tabs','gjs-custom-code','gjs-parser-postcss','gjs-tooltip','gjs-style-bg'],
+  pluginsOpts: {
+    'gjs-blocks-basic': { flexGrid: true },
+    'gjs-preset-webpage': { modalImportTitle: 'Import HTML', modalImportButton: 'Import' },
+  },
+  panels: { defaults: [] },
+});
+
+// ===================== CUSTOM BLOCKS =====================
+const bm = editor.BlockManager;
+
+// --- HERO SECTIONS ---
+bm.add('hero-1', { label: 'Hero + CTA', category: 'Sections', content: `<section style="min-height:80vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);text-align:center;padding:60px 20px;"><div style="max-width:700px"><h1 style="font-family:Poppins,sans-serif;font-size:52px;font-weight:800;color:#fff;margin-bottom:20px;line-height:1.1;">Build Something Amazing</h1><p style="font-size:20px;color:rgba(255,255,255,.85);margin-bottom:32px;line-height:1.6;">Create beautiful websites with our powerful drag-and-drop builder. No coding required.</p><a href="#" style="display:inline-block;padding:16px 40px;background:#fff;color:#764ba2;border-radius:50px;font-size:17px;font-weight:600;text-decoration:none;margin:0 8px;">Get Started</a><a href="#" style="display:inline-block;padding:16px 40px;background:transparent;color:#fff;border:2px solid #fff;border-radius:50px;font-size:17px;font-weight:600;text-decoration:none;margin:0 8px;">Learn More</a></div></section>` });
+
+bm.add('hero-2', { label: 'Hero + Image', category: 'Sections', content: `<section style="display:flex;flex-wrap:wrap;align-items:center;padding:80px 5%;background:#0f172a;"><div style="flex:1;min-width:300px;padding:20px"><h1 style="font-family:Poppins,sans-serif;font-size:48px;font-weight:800;color:#fff;margin-bottom:16px;line-height:1.1">Transform Your Digital Presence</h1><p style="font-size:18px;color:#94a3b8;margin-bottom:28px;line-height:1.7">Powerful tools to help you build, grow, and scale your online business with confidence.</p><a href="#" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none">Start Free Trial</a></div><div style="flex:1;min-width:300px;padding:20px;text-align:center"><img src="https://picsum.photos/600/400?random=1" style="width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3)" alt="Hero Image"/></div></section>` });
+
+bm.add('hero-split', { label: 'Hero Split', category: 'Sections', content: `<section style="display:flex;min-height:90vh;flex-wrap:wrap"><div style="flex:1;min-width:300px;background:#1e293b;display:flex;align-items:center;padding:60px 5%"><div><p style="color:#3b82f6;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Welcome to our platform</p><h1 style="font-family:Poppins,sans-serif;font-size:44px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:20px">The Future of Web Development</h1><p style="font-size:17px;color:#94a3b8;line-height:1.7;margin-bottom:28px">Build stunning websites with our intuitive platform.</p><a href="#" style="display:inline-block;padding:14px 32px;background:#3b82f6;color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Get Started →</a></div></div><div style="flex:1;min-width:300px;background:url('https://picsum.photos/800/900?random=2') center/cover"></div></section>` });
+
+// --- FEATURES ---
+bm.add('features-grid', { label: 'Features Grid', category: 'Sections', content: `<section style="padding:80px 5%;background:#fff"><div style="text-align:center;max-width:600px;margin:0 auto 48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:#1e293b;margin-bottom:12px">Amazing Features</h2><p style="font-size:17px;color:#64748b;line-height:1.6">Everything you need to build modern websites</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;max-width:1100px;margin:0 auto"><div style="background:#f8fafc;border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid fa-bolt"></i></div><h3 style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px">Lightning Fast</h3><p style="font-size:14px;color:#64748b;line-height:1.6">Optimized for speed and performance out of the box.</p></div><div style="background:#f8fafc;border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:linear-gradient(135deg,#10b981,#06b6d4);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid fa-shield-halved"></i></div><h3 style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px">Secure</h3><p style="font-size:14px;color:#64748b;line-height:1.6">Enterprise-grade security for your peace of mind.</p></div><div style="background:#f8fafc;border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid fa-chart-line"></i></div><h3 style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px">Analytics</h3><p style="font-size:14px;color:#64748b;line-height:1.6">Detailed insights to help you grow your business.</p></div></div></section>` });
+
+bm.add('features-list', { label: 'Feature List', category: 'Sections', content: `<section style="padding:80px 5%;background:#0f172a"><div style="max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:40px"><div style="flex:1;min-width:300px"><img src="https://picsum.photos/500/400?random=3" style="width:100%;border-radius:16px" alt="Feature"/></div><div style="flex:1;min-width:300px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:#fff;margin-bottom:24px">Why Choose Us</h2><div style="margin-bottom:20px;display:flex;gap:16px"><div style="width:40px;height:40px;background:#3b82f6;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff"><i class="fa-solid fa-check"></i></div><div><h4 style="color:#fff;font-size:16px;margin-bottom:4px">Easy to Use</h4><p style="color:#94a3b8;font-size:14px;line-height:1.5">Intuitive interface that anyone can master.</p></div></div><div style="margin-bottom:20px;display:flex;gap:16px"><div style="width:40px;height:40px;background:#8b5cf6;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff"><i class="fa-solid fa-check"></i></div><div><h4 style="color:#fff;font-size:16px;margin-bottom:4px">Fully Responsive</h4><p style="color:#94a3b8;font-size:14px;line-height:1.5">Looks perfect on every device and screen size.</p></div></div><div style="display:flex;gap:16px"><div style="width:40px;height:40px;background:#10b981;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff"><i class="fa-solid fa-check"></i></div><div><h4 style="color:#fff;font-size:16px;margin-bottom:4px">24/7 Support</h4><p style="color:#94a3b8;font-size:14px;line-height:1.5">Our team is always ready to help you succeed.</p></div></div></div></div></section>` });
+
+// --- PRICING ---
+bm.add('pricing', { label: 'Pricing Table', category: 'Sections', content: `<section style="padding:80px 5%;background:#fff"><div style="text-align:center;margin-bottom:48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:#1e293b;margin-bottom:12px">Simple Pricing</h2><p style="font-size:17px;color:#64748b">Choose the plan that's right for you</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:960px;margin:0 auto"><div style="border:1px solid #e2e8f0;border-radius:16px;padding:32px;text-align:center"><h3 style="font-size:20px;font-weight:600;color:#1e293b;margin-bottom:8px">Starter</h3><div style="font-size:48px;font-weight:800;color:#1e293b;margin:16px 0">$9<span style="font-size:16px;color:#64748b;font-weight:400">/mo</span></div><ul style="list-style:none;text-align:left;margin-bottom:24px;padding:0"><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #f1f5f9">✓ 5 Projects</li><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #f1f5f9">✓ Basic Support</li><li style="padding:8px 0;color:#475569;font-size:14px">✓ 1GB Storage</li></ul><a href="#" style="display:block;padding:12px;background:#f1f5f9;color:#1e293b;border-radius:8px;font-weight:600;text-decoration:none">Get Started</a></div><div style="border:2px solid #3b82f6;border-radius:16px;padding:32px;text-align:center;position:relative;background:#eff6ff"><div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#3b82f6;color:#fff;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600">Popular</div><h3 style="font-size:20px;font-weight:600;color:#1e293b;margin-bottom:8px">Pro</h3><div style="font-size:48px;font-weight:800;color:#1e293b;margin:16px 0">$29<span style="font-size:16px;color:#64748b;font-weight:400">/mo</span></div><ul style="list-style:none;text-align:left;margin-bottom:24px;padding:0"><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #dbeafe">✓ Unlimited Projects</li><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #dbeafe">✓ Priority Support</li><li style="padding:8px 0;color:#475569;font-size:14px">✓ 50GB Storage</li></ul><a href="#" style="display:block;padding:12px;background:#3b82f6;color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Get Started</a></div><div style="border:1px solid #e2e8f0;border-radius:16px;padding:32px;text-align:center"><h3 style="font-size:20px;font-weight:600;color:#1e293b;margin-bottom:8px">Enterprise</h3><div style="font-size:48px;font-weight:800;color:#1e293b;margin:16px 0">$99<span style="font-size:16px;color:#64748b;font-weight:400">/mo</span></div><ul style="list-style:none;text-align:left;margin-bottom:24px;padding:0"><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #f1f5f9">✓ Everything in Pro</li><li style="padding:8px 0;color:#475569;font-size:14px;border-bottom:1px solid #f1f5f9">✓ Dedicated Support</li><li style="padding:8px 0;color:#475569;font-size:14px">✓ Unlimited Storage</li></ul><a href="#" style="display:block;padding:12px;background:#f1f5f9;color:#1e293b;border-radius:8px;font-weight:600;text-decoration:none">Contact Sales</a></div></div></section>` });
+
+// --- TESTIMONIALS ---
+bm.add('testimonials', { label: 'Testimonials', category: 'Sections', content: `<section style="padding:80px 5%;background:#f8fafc"><div style="text-align:center;margin-bottom:48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:#1e293b;margin-bottom:12px">What Our Customers Say</h2><p style="font-size:17px;color:#64748b">Trusted by thousands of happy customers</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1000px;margin:0 auto"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.1)"><div style="color:#f59e0b;margin-bottom:12px">★★★★★</div><p style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:16px">"This is the best website builder I've ever used. It's incredibly intuitive and the results are stunning."</p><div style="display:flex;align-items:center;gap:12px"><img src="https://picsum.photos/44/44?random=10" style="width:44px;height:44px;border-radius:50%" alt="Avatar"/><div><strong style="color:#1e293b;font-size:14px">Sarah Johnson</strong><p style="color:#64748b;font-size:12px">CEO, TechCorp</p></div></div></div><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.1)"><div style="color:#f59e0b;margin-bottom:12px">★★★★★</div><p style="font-size:15px;color:#475569;line-height:1.6;margin-bottom:16px">"Saved us hundreds of hours of development time. The drag-and-drop is silky smooth."</p><div style="display:flex;align-items:center;gap:12px"><img src="https://picsum.photos/44/44?random=11" style="width:44px;height:44px;border-radius:50%" alt="Avatar"/><div><strong style="color:#1e293b;font-size:14px">Mike Peters</strong><p style="color:#64748b;font-size:12px">CTO, StartupHub</p></div></div></div></div></section>` });
+
+// --- CTA ---
+bm.add('cta-banner', { label: 'CTA Banner', category: 'Sections', content: `<section style="padding:80px 5%;background:linear-gradient(135deg,#1e40af,#7c3aed);text-align:center"><h2 style="font-family:Poppins,sans-serif;font-size:40px;font-weight:700;color:#fff;margin-bottom:16px">Ready to Get Started?</h2><p style="font-size:18px;color:rgba(255,255,255,.8);margin-bottom:32px;max-width:600px;margin-left:auto;margin-right:auto">Join thousands of satisfied customers building amazing websites.</p><a href="#" style="display:inline-block;padding:16px 40px;background:#fff;color:#1e40af;border-radius:50px;font-size:17px;font-weight:600;text-decoration:none">Start Building Free →</a></section>` });
+
+bm.add('newsletter', { label: 'Newsletter', category: 'Sections', content: `<section style="padding:60px 5%;background:#1e293b;text-align:center"><h3 style="font-family:Poppins,sans-serif;font-size:28px;font-weight:700;color:#fff;margin-bottom:8px">Subscribe to Our Newsletter</h3><p style="color:#94a3b8;margin-bottom:24px">Get the latest updates and news delivered to your inbox.</p><form style="display:flex;gap:8px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center"><input type="email" placeholder="Enter your email" style="flex:1;min-width:240px;padding:14px 20px;border:1px solid #334155;background:#0f172a;color:#fff;border-radius:8px;font-size:15px"/><button type="submit" style="padding:14px 28px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:15px;cursor:pointer">Subscribe</button></form></section>` });
+
+// --- FOOTER ---
+bm.add('footer', { label: 'Footer', category: 'Sections', content: `<footer style="background:#0f172a;padding:60px 5% 30px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:1100px;margin:0 auto 40px"><div><h4 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:16px">SiteForge</h4><p style="color:#94a3b8;font-size:14px;line-height:1.6">Building the future of web design, one page at a time.</p></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Product</h5><ul style="list-style:none;padding:0"><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Features</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Pricing</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Templates</a></li></ul></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Company</h5><ul style="list-style:none;padding:0"><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">About</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Blog</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Contact</a></li></ul></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Connect</h5><div style="display:flex;gap:12px"><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none;font-size:16px"><i class="fa-brands fa-twitter"></i></a><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none;font-size:16px"><i class="fa-brands fa-github"></i></a><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none;font-size:16px"><i class="fa-brands fa-linkedin"></i></a></div></div></div><div style="border-top:1px solid #1e293b;padding-top:20px;text-align:center;color:#64748b;font-size:13px">© 2025 SiteForge. All rights reserved.</div></footer>` });
+
+// --- NAVBAR ---
+bm.add('navbar', { label: 'Navbar', category: 'Navigation', content: `<nav style="display:flex;align-items:center;justify-content:space-between;padding:16px 5%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.06);position:sticky;top:0;z-index:100"><div style="font-size:22px;font-weight:700;color:#1e293b;font-family:Poppins,sans-serif">Brand</div><div style="display:flex;align-items:center;gap:28px"><a href="#" style="color:#475569;text-decoration:none;font-size:15px;font-weight:500">Home</a><a href="#" style="color:#475569;text-decoration:none;font-size:15px;font-weight:500">Features</a><a href="#" style="color:#475569;text-decoration:none;font-size:15px;font-weight:500">Pricing</a><a href="#" style="color:#475569;text-decoration:none;font-size:15px;font-weight:500">Contact</a><a href="#" style="padding:10px 24px;background:#3b82f6;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;font-size:14px">Sign Up</a></div></nav>` });
+
+bm.add('navbar-dark', { label: 'Navbar Dark', category: 'Navigation', content: `<nav style="display:flex;align-items:center;justify-content:space-between;padding:16px 5%;background:#0f172a;border-bottom:1px solid #1e293b"><div style="font-size:22px;font-weight:700;color:#fff;font-family:Poppins,sans-serif">Brand</div><div style="display:flex;align-items:center;gap:28px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:15px">Home</a><a href="#" style="color:#94a3b8;text-decoration:none;font-size:15px">About</a><a href="#" style="color:#94a3b8;text-decoration:none;font-size:15px">Services</a><a href="#" style="color:#94a3b8;text-decoration:none;font-size:15px">Contact</a><a href="#" style="padding:10px 24px;background:#3b82f6;color:#fff;border-radius:8px;font-weight:600;text-decoration:none;font-size:14px">Get Started</a></div></nav>` });
+
+// --- CONTENT ---
+bm.add('card', { label: 'Card', category: 'Content', content: `<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);max-width:360px"><img src="https://picsum.photos/360/200?random=20" style="width:100%;height:200px;object-fit:cover" alt="Card"/><div style="padding:20px"><h3 style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px">Card Title</h3><p style="font-size:14px;color:#64748b;line-height:1.5;margin-bottom:16px">A short description that explains what this card is about.</p><a href="#" style="color:#3b82f6;font-weight:600;font-size:14px;text-decoration:none">Read More →</a></div></div>` });
+
+bm.add('team-member', { label: 'Team Member', category: 'Content', content: `<div style="text-align:center;padding:24px"><img src="https://picsum.photos/120/120?random=30" style="width:100px;height:100px;border-radius:50%;margin-bottom:16px;object-fit:cover" alt="Team"/><h4 style="font-size:17px;font-weight:600;color:#1e293b;margin-bottom:4px">Jane Doe</h4><p style="color:#3b82f6;font-size:13px;margin-bottom:8px">Lead Designer</p><p style="color:#64748b;font-size:13px;line-height:1.5">Creative professional with 10+ years of experience.</p></div>` });
+
+bm.add('faq', { label: 'FAQ Section', category: 'Content', content: `<section style="padding:80px 5%;background:#fff"><div style="max-width:700px;margin:0 auto"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:#1e293b;text-align:center;margin-bottom:40px">Frequently Asked Questions</h2><div style="border-bottom:1px solid #e2e8f0;padding:20px 0"><h4 style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:8px">How does it work?</h4><p style="font-size:14px;color:#64748b;line-height:1.6">Simply drag and drop components to build your website. Customize colors, fonts, and layout with our visual editor.</p></div><div style="border-bottom:1px solid #e2e8f0;padding:20px 0"><h4 style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:8px">Is it mobile responsive?</h4><p style="font-size:14px;color:#64748b;line-height:1.6">Yes! All templates and components are fully responsive and look great on any device.</p></div><div style="padding:20px 0"><h4 style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:8px">Can I export my website?</h4><p style="font-size:14px;color:#64748b;line-height:1.6">Absolutely. Export clean HTML and CSS code that you can host anywhere.</p></div></div></section>` });
+
+bm.add('stats', { label: 'Stats Counter', category: 'Content', content: `<section style="padding:60px 5%;background:linear-gradient(135deg,#1e40af,#7c3aed)"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:24px;max-width:800px;margin:0 auto;text-align:center"><div><div style="font-size:42px;font-weight:800;color:#fff">10K+</div><div style="color:rgba(255,255,255,.7);font-size:14px">Customers</div></div><div><div style="font-size:42px;font-weight:800;color:#fff">50M+</div><div style="color:rgba(255,255,255,.7);font-size:14px">Pages Built</div></div><div><div style="font-size:42px;font-weight:800;color:#fff">99.9%</div><div style="color:rgba(255,255,255,.7);font-size:14px">Uptime</div></div><div><div style="font-size:42px;font-weight:800;color:#fff">4.9</div><div style="color:rgba(255,255,255,.7);font-size:14px">Rating</div></div></div></section>` });
+
+bm.add('contact-form', { label: 'Contact Form', category: 'Content', content: `<section style="padding:80px 5%;background:#f8fafc"><div style="max-width:560px;margin:0 auto"><h2 style="font-family:Poppins,sans-serif;font-size:32px;font-weight:700;color:#1e293b;text-align:center;margin-bottom:8px">Get in Touch</h2><p style="text-align:center;color:#64748b;margin-bottom:32px">We'd love to hear from you</p><form><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><input type="text" placeholder="First Name" style="padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff"/><input type="text" placeholder="Last Name" style="padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff"/></div><input type="email" placeholder="Email" style="width:100%;padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:12px;background:#fff"/><textarea placeholder="Message" rows="5" style="width:100%;padding:12px 16px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:16px;resize:vertical;background:#fff;font-family:inherit"></textarea><button type="submit" style="width:100%;padding:14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer">Send Message</button></form></div></section>` });
+
+bm.add('product-card', { label: 'Product Card', category: 'Content', content: `<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);max-width:300px"><div style="position:relative"><img src="https://picsum.photos/300/300?random=40" style="width:100%;height:280px;object-fit:cover" alt="Product"/><span style="position:absolute;top:12px;right:12px;background:#ef4444;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600">Sale</span></div><div style="padding:16px"><h4 style="font-size:16px;font-weight:600;color:#1e293b;margin-bottom:6px">Product Name</h4><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:20px;font-weight:700;color:#1e293b">$49.99</span><span style="font-size:14px;color:#94a3b8;text-decoration:line-through">$79.99</span></div><button style="width:100%;padding:10px;background:#1e293b;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer">Add to Cart</button></div></div>` });
+
+bm.add('divider-fancy', { label: 'Divider', category: 'Content', content: `<div style="padding:20px 5%;text-align:center"><hr style="border:none;height:1px;background:linear-gradient(to right,transparent,#e2e8f0,transparent)"/></div>` });
+
+bm.add('spacer', { label: 'Spacer', category: 'Content', content: `<div style="height:60px"></div>` });
+
+// ===================== TOOLBAR ACTIONS =====================
+document.getElementById('btn-undo').onclick = () => editor.UndoManager.undo();
+document.getElementById('btn-redo').onclick = () => editor.UndoManager.redo();
+
+const deviceBtns = { 'btn-desktop':'Desktop', 'btn-tablet':'Tablet', 'btn-mobile':'Mobile' };
+Object.entries(deviceBtns).forEach(([id,name]) => {
+  document.getElementById(id).onclick = () => {
+    editor.setDevice(name);
+    document.querySelectorAll('.sf-topbar-group .sf-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  };
+});
+
+document.getElementById('btn-borders').onclick = () => editor.runCommand('sw-visibility');
+document.getElementById('btn-preview').onclick = () => editor.runCommand('preview');
+document.getElementById('btn-fullscreen').onclick = () => {
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+};
+document.getElementById('btn-code').onclick = () => editor.runCommand('export-template');
+document.getElementById('btn-clear').onclick = () => { if(confirm('Clear the entire canvas?')) { editor.DomComponents.clear(); editor.CssComposer.clear(); } };
+document.getElementById('btn-export').onclick = () => {
+  const html = editor.getHtml();
+  const css = editor.getCss();
+  const full = `<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<title>My Website</title>\n<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">\n<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">\n<style>\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:Inter,sans-serif}\n${css}\n</style>\n</head>\n<body>\n${html}\n</body>\n</html>`;
+  const blob = new Blob([full], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'website.html';
+  a.click();
+};
+
+// LEFT TABS
+document.querySelectorAll('.sf-left-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.sf-left-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const target = tab.dataset.tab;
+    document.getElementById('blocks-container').style.display = target==='blocks'?'':'none';
+    document.getElementById('pages-container').style.display = target==='pages'?'':'none';
+  };
+});
+
+// RIGHT TABS
+document.querySelectorAll('.sf-right-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.sf-right-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.sf-right-pane').forEach(p => p.classList.remove('active'));
+    const map = { styles:'styles-container', traits:'traits-container', layers:'layers-container' };
+    document.getElementById(map[tab.dataset.tab]).classList.add('active');
+  };
+});
+
+// ===================== MODALS =====================
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.getElementById('btn-ai').onclick = () => openModal('ai-modal');
+document.getElementById('btn-templates').onclick = () => { renderTemplates(); openModal('templates-modal'); };
+document.getElementById('btn-import').onclick = () => openModal('import-modal');
+document.querySelectorAll('.sf-overlay').forEach(o => { o.onclick = e => { if(e.target===o) closeModal(o.id); }; });
+
+function importHtml() {
+  const code = document.getElementById('import-code').value;
+  if(code.trim()) { editor.setComponents(code); closeModal('import-modal'); }
+}
+
+function setAiPrompt(text) { document.getElementById('ai-prompt').value = text; }
+
+// ===================== AI GENERATOR =====================
+function generateAiWebsite() {
+  const prompt = document.getElementById('ai-prompt').value.trim();
+  if(!prompt) return;
+  const form = document.getElementById('ai-form');
+  const loading = document.getElementById('ai-loading');
+  const loadText = document.getElementById('ai-loading-text');
+  form.classList.add('hidden');
+  loading.classList.add('show');
+
+  const steps = ['Analyzing your description...','Choosing color palette...','Generating layout structure...','Creating sections...','Adding content...','Polishing design...','Almost done...'];
+  let si = 0;
+  const interval = setInterval(() => { si++; if(si<steps.length) loadText.textContent=steps[si]; }, 600);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    const html = buildWebsiteFromPrompt(prompt);
+    editor.DomComponents.clear();
+    editor.CssComposer.clear();
+    editor.setComponents(html);
+    loading.classList.remove('show');
+    form.classList.remove('hidden');
+    closeModal('ai-modal');
+  }, 4200);
+}
+
+function buildWebsiteFromPrompt(prompt) {
+  const p = prompt.toLowerCase();
+  // Detect type
+  const isRestaurant = /restaurant|cafe|bistro|food|pizza|sushi|bakery|diner|grill|kitchen|menu/.test(p);
+  const isPortfolio = /portfolio|photographer|designer|artist|freelanc|creative|personal/.test(p);
+  const isEcommerce = /shop|store|ecommerce|e-commerce|product|buy|sell|jewelry|fashion|cloth/.test(p);
+  const isFitness = /gym|fitness|workout|training|health|yoga|sport|crossfit/.test(p);
+  const isSaas = /saas|app|software|platform|tool|analytics|dashboard|startup|tech/.test(p);
+  const isBlog = /blog|news|magazine|article|journal/.test(p);
+  const isAgency = /agency|marketing|consulting|service|digital|creative agency/.test(p);
+
+  // Extract name
+  let siteName = 'MyBrand';
+  const nameMatch = prompt.match(/called\s+([\w\s]+?)[\.\,\!]/i) || prompt.match(/named\s+([\w\s]+?)[\.\,\!]/i) || prompt.match(/for\s+([A-Z][\w\s]*?)[\.\,\!]/i);
+  if(nameMatch) siteName = nameMatch[1].trim();
+
+  // Color schemes
+  const schemes = {
+    restaurant: { primary:'#dc2626', accent:'#f59e0b', bg:'#fef2f2', dark:'#1c1917', grad:'linear-gradient(135deg,#dc2626,#f59e0b)' },
+    portfolio: { primary:'#8b5cf6', accent:'#06b6d4', bg:'#faf5ff', dark:'#0f0f23', grad:'linear-gradient(135deg,#8b5cf6,#06b6d4)' },
+    ecommerce: { primary:'#d97706', accent:'#be185d', bg:'#fffbeb', dark:'#1c1917', grad:'linear-gradient(135deg,#d97706,#be185d)' },
+    fitness: { primary:'#dc2626', accent:'#f97316', bg:'#0a0a0a', dark:'#0a0a0a', grad:'linear-gradient(135deg,#dc2626,#f97316)' },
+    saas: { primary:'#3b82f6', accent:'#8b5cf6', bg:'#eff6ff', dark:'#0f172a', grad:'linear-gradient(135deg,#3b82f6,#8b5cf6)' },
+    blog: { primary:'#059669', accent:'#0891b2', bg:'#f0fdf4', dark:'#064e3b', grad:'linear-gradient(135deg,#059669,#0891b2)' },
+    agency: { primary:'#e11d48', accent:'#7c3aed', bg:'#fff1f2', dark:'#0f0326', grad:'linear-gradient(135deg,#e11d48,#7c3aed)' },
+    default: { primary:'#3b82f6', accent:'#8b5cf6', bg:'#f8fafc', dark:'#0f172a', grad:'linear-gradient(135deg,#3b82f6,#8b5cf6)' }
+  };
+  let type = 'default';
+  if(isRestaurant) type='restaurant'; else if(isPortfolio) type='portfolio'; else if(isEcommerce) type='ecommerce'; else if(isFitness) type='fitness'; else if(isSaas) type='saas'; else if(isBlog) type='blog'; else if(isAgency) type='agency';
+  const c = schemes[type];
+
+  // Detect color from prompt
+  if(/blue/.test(p)) { c.primary='#3b82f6'; c.grad='linear-gradient(135deg,#3b82f6,#2563eb)'; }
+  if(/purple/.test(p)) { c.primary='#8b5cf6'; c.grad='linear-gradient(135deg,#8b5cf6,#7c3aed)'; }
+  if(/green/.test(p)) { c.primary='#10b981'; c.grad='linear-gradient(135deg,#10b981,#059669)'; }
+  if(/red/.test(p)) { c.primary='#ef4444'; c.grad='linear-gradient(135deg,#ef4444,#dc2626)'; }
+  if(/orange/.test(p)) { c.primary='#f97316'; c.grad='linear-gradient(135deg,#f97316,#ea580c)'; }
+  if(/pink/.test(p)) { c.primary='#ec4899'; c.grad='linear-gradient(135deg,#ec4899,#be185d)'; }
+  if(/gold/.test(p)) { c.primary='#d97706'; c.grad='linear-gradient(135deg,#d97706,#b45309)'; }
+  if(/dark/.test(p) || /neon/.test(p)) { c.dark='#0a0a0a'; c.bg='#0a0a0a'; }
+
+  const isDark = /dark|neon|futurist/.test(p) || isFitness;
+  const textColor = isDark ? '#fff' : '#1e293b';
+  const textMuted = isDark ? '#94a3b8' : '#64748b';
+  const sectionBg = isDark ? '#0f172a' : '#fff';
+  const sectionBg2 = isDark ? '#1e293b' : '#f8fafc';
+  const cardBg = isDark ? '#1e293b' : '#fff';
+  const cardBorder = isDark ? '#334155' : '#e2e8f0';
+  const inputBg = isDark ? '#0f172a' : '#fff';
+
+  let sections = '';
+
+  // NAVBAR
+  sections += `<nav style="display:flex;align-items:center;justify-content:space-between;padding:16px 5%;background:${isDark?c.dark:'#fff'};${isDark?'border-bottom:1px solid #1e293b':'box-shadow:0 1px 3px rgba(0,0,0,.06)'};position:sticky;top:0;z-index:100"><div style="font-size:22px;font-weight:700;color:${isDark?'#fff':c.primary};font-family:Poppins,sans-serif">${siteName}</div><div style="display:flex;align-items:center;gap:28px"><a href="#" style="color:${textMuted};text-decoration:none;font-size:15px">Home</a><a href="#" style="color:${textMuted};text-decoration:none;font-size:15px">About</a><a href="#" style="color:${textMuted};text-decoration:none;font-size:15px">${isRestaurant?'Menu':isEcommerce?'Shop':'Features'}</a><a href="#" style="color:${textMuted};text-decoration:none;font-size:15px">Contact</a><a href="#" style="padding:10px 24px;background:${c.primary};color:#fff;border-radius:8px;font-weight:600;text-decoration:none;font-size:14px">${isEcommerce?'Shop Now':isRestaurant?'Reserve':'Get Started'}</a></div></nav>`;
+
+  // HERO
+  const heroSubtitle = isRestaurant ? 'Authentic Italian cuisine made with love and the finest ingredients' : isPortfolio ? 'I design beautiful digital experiences that people love' : isEcommerce ? 'Discover our handcrafted collection made with passion and care' : isFitness ? 'Push your limits, transform your body, become unstoppable' : isSaas ? 'The all-in-one platform that helps you work smarter, not harder' : isAgency ? 'We build digital experiences that drive growth and engagement' : 'Building amazing digital experiences for the modern world';
+  sections += `<section style="min-height:85vh;display:flex;align-items:center;justify-content:center;background:${c.grad};text-align:center;padding:80px 20px;position:relative;overflow:hidden"><div style="position:relative;z-index:1;max-width:750px"><h1 style="font-family:Poppins,sans-serif;font-size:56px;font-weight:800;color:#fff;margin-bottom:20px;line-height:1.1">${isRestaurant?'Welcome to '+siteName:isPortfolio?'Hi, I\'m '+siteName:siteName}</h1><p style="font-size:20px;color:rgba(255,255,255,.85);margin-bottom:36px;line-height:1.6">${heroSubtitle}</p><a href="#" style="display:inline-block;padding:16px 40px;background:#fff;color:${c.primary};border-radius:50px;font-size:17px;font-weight:600;text-decoration:none;margin:0 8px">${isRestaurant?'View Menu':isEcommerce?'Shop Now':'Get Started'}</a><a href="#" style="display:inline-block;padding:16px 40px;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:50px;font-size:17px;font-weight:600;text-decoration:none;margin:0 8px">Learn More</a></div></section>`;
+
+  // FEATURES / SERVICES
+  const featureIcon1 = isRestaurant?'fa-utensils':isPortfolio?'fa-pen-nib':isEcommerce?'fa-gem':isFitness?'fa-dumbbell':isSaas?'fa-bolt':'fa-rocket';
+  const featureIcon2 = isRestaurant?'fa-wine-glass':isPortfolio?'fa-camera':isEcommerce?'fa-truck':isFitness?'fa-heart-pulse':isSaas?'fa-shield-halved':'fa-chart-line';
+  const featureIcon3 = isRestaurant?'fa-star':isPortfolio?'fa-code':isEcommerce?'fa-rotate-left':isFitness?'fa-person-running':isSaas?'fa-chart-line':'fa-users';
+  const featureTitle1 = isRestaurant?'Fresh Ingredients':isPortfolio?'UI/UX Design':isEcommerce?'Handcrafted':isFitness?'Expert Training':'Lightning Fast';
+  const featureTitle2 = isRestaurant?'Fine Wines':isPortfolio?'Photography':isEcommerce?'Free Shipping':isFitness?'Health Tracking':'Secure';
+  const featureTitle3 = isRestaurant?'5-Star Service':isPortfolio?'Web Development':isEcommerce?'Easy Returns':isFitness?'Personal Coaching':'Analytics';
+  sections += `<section style="padding:80px 5%;background:${sectionBg}"><div style="text-align:center;max-width:600px;margin:0 auto 48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:${textColor};margin-bottom:12px">${isRestaurant?'Why Dine With Us':isPortfolio?'What I Do':isEcommerce?'Why Choose Us':'Our Features'}</h2><p style="font-size:17px;color:${textMuted};line-height:1.6">${isRestaurant?'An unforgettable dining experience awaits':'Delivering excellence in every project'}</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;max-width:1100px;margin:0 auto"><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:${c.grad};border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid ${featureIcon1}"></i></div><h3 style="font-size:18px;font-weight:600;color:${textColor};margin-bottom:8px">${featureTitle1}</h3><p style="font-size:14px;color:${textMuted};line-height:1.6">We take pride in delivering the highest quality experience to our customers.</p></div><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:${c.grad};border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid ${featureIcon2}"></i></div><h3 style="font-size:18px;font-weight:600;color:${textColor};margin-bottom:8px">${featureTitle2}</h3><p style="font-size:14px;color:${textMuted};line-height:1.6">Our attention to detail ensures every aspect meets the highest standards.</p></div><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:32px;text-align:center"><div style="width:56px;height:56px;background:${c.grad};border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:#fff"><i class="fa-solid ${featureIcon3}"></i></div><h3 style="font-size:18px;font-weight:600;color:${textColor};margin-bottom:8px">${featureTitle3}</h3><p style="font-size:14px;color:${textMuted};line-height:1.6">We go above and beyond to ensure complete satisfaction.</p></div></div></section>`;
+
+  // ABOUT / GALLERY
+  sections += `<section style="padding:80px 5%;background:${sectionBg2}"><div style="max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:48px"><div style="flex:1;min-width:300px"><img src="https://picsum.photos/500/400?random=${Math.floor(Math.random()*100)}" style="width:100%;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.15)" alt="About"/></div><div style="flex:1;min-width:300px"><p style="color:${c.primary};font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">About Us</p><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:${textColor};margin-bottom:16px;line-height:1.2">${isRestaurant?'A Legacy of Flavor':'Our Story'}</h2><p style="font-size:16px;color:${textMuted};line-height:1.7;margin-bottom:24px">${isRestaurant?'For over 20 years, we have been serving the finest Italian cuisine crafted from family recipes passed down through generations.':'We are passionate about what we do. Our team of dedicated professionals works tirelessly to deliver exceptional results that exceed expectations.'}</p><a href="#" style="display:inline-block;padding:12px 28px;background:${c.primary};color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Learn More →</a></div></div></section>`;
+
+  // TESTIMONIALS
+  sections += `<section style="padding:80px 5%;background:${sectionBg}"><div style="text-align:center;margin-bottom:48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:${textColor};margin-bottom:12px">What People Say</h2><p style="font-size:17px;color:${textMuted}">Don't just take our word for it</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1000px;margin:0 auto"><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:28px"><div style="color:#f59e0b;margin-bottom:12px">★★★★★</div><p style="font-size:15px;color:${textMuted};line-height:1.6;margin-bottom:16px">"Absolutely incredible experience. The quality and attention to detail is unmatched. Highly recommended!"</p><div style="display:flex;align-items:center;gap:12px"><img src="https://picsum.photos/44/44?random=61" style="width:44px;height:44px;border-radius:50%" alt="Avatar"/><div><strong style="color:${textColor};font-size:14px">Sarah Johnson</strong><p style="color:${textMuted};font-size:12px">Happy Customer</p></div></div></div><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:12px;padding:28px"><div style="color:#f59e0b;margin-bottom:12px">★★★★★</div><p style="font-size:15px;color:${textMuted};line-height:1.6;margin-bottom:16px">"Exceeded all my expectations. The team is professional, responsive, and truly cares about their craft."</p><div style="display:flex;align-items:center;gap:12px"><img src="https://picsum.photos/44/44?random=62" style="width:44px;height:44px;border-radius:50%" alt="Avatar"/><div><strong style="color:${textColor};font-size:14px">Michael Chen</strong><p style="color:${textMuted};font-size:12px">Loyal Customer</p></div></div></div></div></section>`;
+
+  // PRICING (if saas/fitness)
+  if(isSaas || isFitness || /pricing|plan/.test(p)) {
+    sections += `<section style="padding:80px 5%;background:${sectionBg2}"><div style="text-align:center;margin-bottom:48px"><h2 style="font-family:Poppins,sans-serif;font-size:36px;font-weight:700;color:${textColor};margin-bottom:12px">${isFitness?'Membership Plans':'Pricing Plans'}</h2><p style="font-size:17px;color:${textMuted}">Choose the perfect plan for you</p></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;max-width:900px;margin:0 auto"><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:16px;padding:32px;text-align:center"><h3 style="font-size:20px;font-weight:600;color:${textColor}">Basic</h3><div style="font-size:48px;font-weight:800;color:${textColor};margin:16px 0">${isFitness?'$29':'$9'}<span style="font-size:16px;color:${textMuted};font-weight:400">/mo</span></div><ul style="list-style:none;padding:0;text-align:left;margin-bottom:24px"><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Gym Access':'5 Projects'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Basic Classes':'Email Support'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Locker Room':'1GB Storage'}</li></ul><a href="#" style="display:block;padding:12px;background:${isDark?'#334155':'#f1f5f9'};color:${textColor};border-radius:8px;font-weight:600;text-decoration:none">Get Started</a></div><div style="background:${cardBg};border:2px solid ${c.primary};border-radius:16px;padding:32px;text-align:center;position:relative"><div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:${c.primary};color:#fff;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:600">Popular</div><h3 style="font-size:20px;font-weight:600;color:${textColor}">Pro</h3><div style="font-size:48px;font-weight:800;color:${textColor};margin:16px 0">${isFitness?'$59':'$29'}<span style="font-size:16px;color:${textMuted};font-weight:400">/mo</span></div><ul style="list-style:none;padding:0;text-align:left;margin-bottom:24px"><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'All Basic Features':'Unlimited Projects'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Personal Trainer':'Priority Support'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Nutrition Plan':'50GB Storage'}</li></ul><a href="#" style="display:block;padding:12px;background:${c.primary};color:#fff;border-radius:8px;font-weight:600;text-decoration:none">Get Started</a></div><div style="background:${cardBg};border:1px solid ${cardBorder};border-radius:16px;padding:32px;text-align:center"><h3 style="font-size:20px;font-weight:600;color:${textColor}">Enterprise</h3><div style="font-size:48px;font-weight:800;color:${textColor};margin:16px 0">${isFitness?'$99':'$79'}<span style="font-size:16px;color:${textMuted};font-weight:400">/mo</span></div><ul style="list-style:none;padding:0;text-align:left;margin-bottom:24px"><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'VIP Access':'Everything in Pro'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Spa & Recovery':'Dedicated Support'}</li><li style="padding:8px 0;color:${textMuted};font-size:14px">✓ ${isFitness?'Guest Passes':'Custom Integrations'}</li></ul><a href="#" style="display:block;padding:12px;background:${isDark?'#334155':'#f1f5f9'};color:${textColor};border-radius:8px;font-weight:600;text-decoration:none">Contact Sales</a></div></div></section>`;
+  }
+
+  // CTA
+  sections += `<section style="padding:80px 5%;background:${c.grad};text-align:center"><h2 style="font-family:Poppins,sans-serif;font-size:40px;font-weight:700;color:#fff;margin-bottom:16px">${isRestaurant?'Reserve Your Table Today':isEcommerce?'Start Shopping Now':'Ready to Get Started?'}</h2><p style="font-size:18px;color:rgba(255,255,255,.8);margin-bottom:32px;max-width:600px;margin-left:auto;margin-right:auto">Join thousands of satisfied customers and experience the difference.</p><a href="#" style="display:inline-block;padding:16px 40px;background:#fff;color:${c.primary};border-radius:50px;font-size:17px;font-weight:600;text-decoration:none">${isRestaurant?'Book a Table':isEcommerce?'Browse Collection':'Start Free Trial'} →</a></section>`;
+
+  // CONTACT
+  if(/contact|form|reserv|book/.test(p) || isRestaurant) {
+    sections += `<section style="padding:80px 5%;background:${sectionBg2}"><div style="max-width:560px;margin:0 auto"><h2 style="font-family:Poppins,sans-serif;font-size:32px;font-weight:700;color:${textColor};text-align:center;margin-bottom:32px">${isRestaurant?'Make a Reservation':'Contact Us'}</h2><form><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><input type="text" placeholder="First Name" style="padding:14px 16px;border:1px solid ${cardBorder};border-radius:8px;font-size:14px;background:${inputBg};color:${textColor}"/><input type="text" placeholder="Last Name" style="padding:14px 16px;border:1px solid ${cardBorder};border-radius:8px;font-size:14px;background:${inputBg};color:${textColor}"/></div><input type="email" placeholder="Email" style="width:100%;padding:14px 16px;border:1px solid ${cardBorder};border-radius:8px;font-size:14px;margin-bottom:12px;background:${inputBg};color:${textColor}"/><textarea placeholder="${isRestaurant?'Special requests...':'Your message...'} " rows="5" style="width:100%;padding:14px 16px;border:1px solid ${cardBorder};border-radius:8px;font-size:14px;margin-bottom:16px;resize:vertical;background:${inputBg};color:${textColor};font-family:inherit"></textarea><button type="submit" style="width:100%;padding:14px;background:${c.primary};color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer">${isRestaurant?'Reserve Now':'Send Message'}</button></form></div></section>`;
+  }
+
+  // FOOTER
+  sections += `<footer style="background:${isDark?'#0a0a0a':'#0f172a'};padding:60px 5% 30px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:1100px;margin:0 auto 40px"><div><h4 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:16px;font-family:Poppins,sans-serif">${siteName}</h4><p style="color:#94a3b8;font-size:14px;line-height:1.6">${isRestaurant?'Authentic cuisine, unforgettable moments.':'Building exceptional experiences since day one.'}</p></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Quick Links</h5><ul style="list-style:none;padding:0"><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Home</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">About</a></li><li style="margin-bottom:8px"><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">${isRestaurant?'Menu':'Services'}</a></li><li><a href="#" style="color:#94a3b8;text-decoration:none;font-size:14px">Contact</a></li></ul></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Contact</h5><p style="color:#94a3b8;font-size:14px;line-height:2"><i class="fa-solid fa-envelope" style="margin-right:8px"></i>hello@${siteName.toLowerCase().replace(/\s/g,'')}.com<br><i class="fa-solid fa-phone" style="margin-right:8px"></i>+1 (555) 123-4567<br><i class="fa-solid fa-location-dot" style="margin-right:8px"></i>123 Main St, City</p></div><div><h5 style="color:#fff;font-size:14px;font-weight:600;margin-bottom:12px">Follow Us</h5><div style="display:flex;gap:10px"><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none"><i class="fa-brands fa-twitter"></i></a><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none"><i class="fa-brands fa-instagram"></i></a><a href="#" style="width:36px;height:36px;background:#1e293b;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-decoration:none"><i class="fa-brands fa-facebook"></i></a></div></div></div><div style="border-top:1px solid #1e293b;padding-top:20px;text-align:center;color:#64748b;font-size:13px">© 2025 ${siteName}. All rights reserved.</div></footer>`;
+
+  return sections;
+}
+
+// ===================== TEMPLATES =====================
+const templates = [
+  { name:'Landing Page', icon:'🚀', desc:'Modern SaaS landing page', prompt:'A modern SaaS landing page for a productivity app called FlowSync with blue-purple gradient, hero, features grid, pricing, testimonials, CTA and footer' },
+  { name:'Business', icon:'🏢', desc:'Professional business site', prompt:'A professional business consulting website called Nexus Consulting with dark navy theme, hero section, services, about us, team members, testimonials, contact form, footer' },
+  { name:'Portfolio', icon:'🎨', desc:'Creative portfolio', prompt:'A minimalist creative portfolio for a designer called Alex Morgan, dark theme, hero with intro, project gallery, skills section, about, contact form' },
+  { name:'Restaurant', icon:'🍽️', desc:'Restaurant & dining', prompt:'An elegant Italian restaurant called La Dolce Vita, warm red and gold colors, hero, menu highlights, about the chef, testimonials, reservation form, footer' },
+  { name:'E-commerce', icon:'🛍️', desc:'Online store', prompt:'A luxury fashion e-commerce store called Velvet & Co, elegant gold and dark theme, hero, featured products, collections, testimonials, newsletter, footer' },
+  { name:'Fitness', icon:'💪', desc:'Gym & fitness', prompt:'A bold fitness gym called IronForge with dark theme and red accents, hero, features, trainer profiles, membership pricing plans, CTA, contact form, footer' },
+  { name:'Blog', icon:'📝', desc:'Blog & magazine', prompt:'A modern blog and magazine called The Daily Digest with green theme, hero, featured articles grid, categories, newsletter signup, about section, footer' },
+  { name:'Agency', icon:'⚡', desc:'Digital agency', prompt:'A creative digital marketing agency called Spark Agency with pink-purple gradient, hero, services grid, case studies, team, testimonials, contact, footer' },
+];
+
+function renderTemplates() {
+  const grid = document.getElementById('templates-grid');
+  grid.innerHTML = templates.map(t => `<div class="sf-template-card" onclick="loadTemplate('${t.prompt.replace(/'/g,"\\'")}')"><div class="sf-template-preview">${t.icon}</div><div class="sf-template-info"><div class="sf-template-name">${t.name}</div><div class="sf-template-desc">${t.desc}</div></div></div>`).join('');
+}
+
+function loadTemplate(prompt) {
+  closeModal('templates-modal');
+  const html = buildWebsiteFromPrompt(prompt);
+  editor.DomComponents.clear();
+  editor.CssComposer.clear();
+  editor.setComponents(html);
+}
+
+// INIT: show borders by default
+editor.on('load', () => { editor.runCommand('sw-visibility'); });
+</script>
+</body>
+</html>
